@@ -36,11 +36,12 @@ public class AddUser {
 
     @Test
     public void testAddUser() throws IOException {
-        mainPage.path = "c:\\tmp\\screenshot";
+        mainPage.path = "c:\\tmp\\result\\screenshot";
 
         mainPage.getUrl("http://isui-test.osslabs.ru");
         mainPage.login("admin", "123456");
         mainPage.usersRegisty();
+        mainPage.createButtonClick();
         mainPage.dataNewUser("atest", "Иван", "Иванов", "iv-ivanov@list.ru", "123456");
         mainPage.saveButtonClick();
         mainPage.usersRegisty();

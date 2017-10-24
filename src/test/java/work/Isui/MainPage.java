@@ -8,6 +8,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,7 +30,6 @@ public class MainPage {
     public MainPage(WebDriver webDriver) {
         driver = webDriver;
         wait = new WebDriverWait(driver, 30);
-        //this.driver = driver;
         PageFactory.initElements(driver, this);
     }
 
@@ -64,17 +64,40 @@ public class MainPage {
     // Реестр пользователи
     public void usersRegisty() {
         menu.click();
-        seciurity.click();
-        users.click();
-        Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt121:usersTable_head']")).getText().contains("Логин"));
         screen(path);
+        seciurity.click();
+        screen(path);
+        users.click();
+        // wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='j_idt121:usersTable_head']")));
+        // screen(path);
+        //   Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt121:usersTable_head']")).getText().contains("Логин"));
+
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='j_idt121:usersTable_head']")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt121:usersTable_head']")).getText().contains("Логин"));
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt121:usersTable_head']")).getText().contains("Логин"));
+        }
+    }
+
+    public void createButtonClick() {
+        createButton.click();
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("userForm")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.id("userForm")).getText().contains("Корпоративный E-Mail"));
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.id("userForm")).getText().contains("Корпоративный E-Mail"));
+        }
+
     }
 
     //  флорма создание Пользователи
     public void dataNewUser(String loginName, String firstName, String lastName, String eMail, String password) {
 
-        createButton.click();
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("userForm"), "Корпоративный E-Mail"));
 
         // нажать наи галочку "Доступ к системе"
         driver.findElement(By.xpath(".//*[@id='userForm:enabled']/div[2]")).click();
@@ -104,16 +127,32 @@ public class MainPage {
 
         driver.findElement(By.xpath("//*[@id=\"userForm:tenant_1\"]")).click();  //выбыраем
 
+        screen(path);
+
 
     }
 
     public void searchUser(String searchText) {
+
         driver.findElement(By.xpath(".//*[@id='j_idt121:usersTable:j_idt122:filter']")).sendKeys(searchText);
         waitLoadAjaxFon();
-        driver.findElement(By.linkText(searchText)).click();
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("userForm"), "Корпоративный E-Mail"));
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         screen(path);
-        System.out.println(driver.findElement(By.id("userForm:loginname")).getAttribute("value"));
+        driver.findElement(By.linkText(searchText)).click();
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("userForm")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.id("userForm")).getText().contains("Корпоративный E-Mail"));
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.id("userForm")).getText().contains("Корпоративный E-Mail"));
+        }
+        // wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("userForm"), "Корпоративный E-Mail"));
+        //System.out.println(driver.findElement(By.id("userForm:loginname")).getAttribute("value"));
         Assert.assertEquals(searchText, driver.findElement(By.id("userForm:loginname")).getAttribute("value"));
     }
 
@@ -131,17 +170,20 @@ public class MainPage {
         }
 
     }
-    public void waitUntilNull(){
+
+    public void waitUntilNull() {
         int count = 0;
-        while ( count < 30) {
-            if(driver.findElement(By.xpath(".//*[@id='growl_container']/div[1]/div/div[1]")).getText()== "") {
+        while (count < 30) {
+            if (driver.findElement(By.xpath(".//*[@id='growl_container']/div[1]/div/div[1]")).getText() == "") {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 count++;
-            }else{break;}
+            } else {
+                break;
+            }
         }
     }
 
@@ -219,28 +261,39 @@ public class MainPage {
         baseUrl = url;
         driver.navigate().to(baseUrl + "/platform/views/system/login.xhtml");
         //wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='loginDialog']/div[1]")));
-        Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"),
-                " Ошибка: адресс не открылся ");
+        //  Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"),
+        //" Ошибка: адресс не открылся ");
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='loginDialog']/div[1]")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"), " Ошибка: адресс не открылся ");
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"), " Ошибка: адресс не открылся ");
+        }
     }
     /***/
 
     /**********************************************  Авторизация  *****************************************************/
-    public boolean login(String username, String password) {
+    public void login(String username, String password) {
 
 
         driver.findElement(By.id("j_username")).clear();
         driver.findElement(By.id("j_username")).sendKeys(username);
         driver.findElement(By.id("j_password")).clear();
         driver.findElement(By.id("j_password")).sendKeys(password);
+        screen(path);
         driver.findElement(By.id("loginBtn")).click();
 
         // Assert.assertFalse(driver.findElement(By.id("loginForm")).getText().contains("Неверная пара логин/пароль"), "Ошибка авторизации");
         try {
-            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt111']/a[2]")).
-                    getText().contains("Выйти"), username + " не смог авторизоваться");
-            return true;
-        } catch (Exception e) {
-            return false;
+            //Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt111']/a[2]")).getText().contains("Выйти"), username + " не смог авторизоваться");
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='j_idt111']/a[2]")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt111']/a[2]")).getText().contains("Выйти"), username + " не смог авторизоваться");
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='j_idt111']/a[2]")).getText().contains("Выйти"), username + " не смог авторизоваться");
         }
 
     }
@@ -258,7 +311,15 @@ public class MainPage {
     /****************************************************  ВЫЙТИ  *****************************************************/
     public void logout() {
         driver.navigate().to(baseUrl + "/platform/logout");
-        Assert.assertTrue(isElementPresent(By.id("loginBtn")));
+        //Assert.assertTrue(isElementPresent(By.id("loginBtn")));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[@id='loginDialog']/div[1]")));
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"), " Ошибка: адресс не открылся ");
+        } catch (RuntimeException e) {
+            screen(path);
+            Assert.assertTrue(driver.findElement(By.xpath(".//*[@id='loginDialog']/div[1]")).getText().equals("Вход"), " Ошибка: адресс не открылся ");
+        }
     }
     /******************************************************************************************************************/
 
@@ -272,14 +333,16 @@ public class MainPage {
 
 
     /*********************************************   Запись в файл  ***************************************************/
-    public void WriteToFile(String PatchFile, String idGos) throws Exception {
-        File file = new File(PatchFile);
-        FileWriter writer = new FileWriter(file);
-        writer.write(idGos);
-        writer.flush();
+    public void writeToFile(String filePath) throws Exception {
+        FileWriter writer = new FileWriter(filePath, true);
+        BufferedWriter bw = new BufferedWriter(writer);
+        bw.write("  - ");
+        bw.flush();
         writer.close();
     }
+
     /******************************************************************************************************************/
+
 
 
     /*************************************** Проверяет появился ли фрейм  ********************************************/
